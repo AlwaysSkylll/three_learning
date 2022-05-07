@@ -15,93 +15,90 @@
      */
     var scene = new THREE.Scene();
 
-		// var geometry = new THREE.BufferGeometry(); //创建一个Buffer类型几何体对象
-		// //类型数组创建顶点数据
-		// var vertices = new Float32Array([
-		//   0, 0, 0, //顶点1坐标
-		//   50, 0, 0, //顶点2坐标
-		//   0, 100, 0, //顶点3坐标
-		//   0, 0, 0, //顶点4坐标
-		//   0, 0, 100, //顶点5坐标
-		//   50, 0, 0, //顶点6坐标
-		// ]);
-		// // 创建属性缓冲区对象
-		// var attribue = new THREE.BufferAttribute(vertices, 3); //3个为一组，表示一个顶点的xyz坐标
-		// // 设置几何体attributes属性的位置属性
-		// geometry.attributes.position = attribue;
-
-		// var normals = new Float32Array([
-		//   0, 0, 1, //顶点1法向量
-		//   0, 0, 1, //顶点2法向量
-		//   0, 0, 1, //顶点3法向量
-
-		//   0, 1, 0, //顶点4法向量
-		//   0, 1, 0, //顶点5法向量
-		//   0, 1, 0, //顶点6法向量
-		// ]);
-		// // 设置几何体attributes属性的位置normal属性
-		// geometry.attributes.normal = new THREE.BufferAttribute(normals, 3); //3个为一组,表示一个顶点的法向量数据
-
-		// var colors = new Float32Array([
-		//   0, 0, 1, //顶点1颜色
-		//   0, 0, 1, //顶点2颜色
-		//   0, 0, 1, //顶点3颜色
-
-		//   0, 0, 1, //顶点4颜色
-		//   0, 0, 1, //顶点5颜色
-		//   0, 0, 1, //顶点6颜色
-		// ]);
-		// // 设置几何体attributes属性的颜色color属性
-		// geometry.attributes.color = new THREE.BufferAttribute(colors, 3); //3个为一组,表示一个顶点的颜色数据RGB
-
-		// // 三角面(网格)渲染模式
-		// var material = new THREE.MeshBasicMaterial({
-		//   color: 0x0000ff, //三角面颜色
-		//   // vertexColors: THREE.VertexColors, //以顶点颜色为准
-		//   // side: THREE.DoubleSide //两面可见
-		//   size: 10.0, //点对象像素尺寸
-		// }); //材质对象
-		// var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-		// scene.add(mesh);
-
-
-		var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
-		var p1 = new THREE.Vector3(50, 0, 0); //顶点1坐标
-		var p2 = new THREE.Vector3(0, 70, 0); //顶点2坐标
-		var p3 = new THREE.Vector3(80, 70, 0); //顶点3坐标
-		//顶点坐标添加到geometry对象
-		geometry.vertices.push(p1, p2, p3);
-		// Color对象表示顶点颜色数据
-		var color1 = new THREE.Color(0x00ff00); //顶点1颜色——绿色
-		var color2 = new THREE.Color(0xff0000); //顶点2颜色——红色
-		var color3 = new THREE.Color(0x0000ff); //顶点3颜色——蓝色
-		//顶点颜色数据添加到geometry对象
-		geometry.colors.push(color1, color2, color3);
-		//材质对象
-		var material = new THREE.PointsMaterial({
-		  // color: 0xffff00,
-		  vertexColors: THREE.VertexColors, //以顶点颜色为准
-		  side: THREE.DoubleSide, //两面可见
-		});
-
-		var mesh = new THREE.Points(geometry, material); //网格模型对象Mesh
-		scene.add(mesh);
-
-
+		var box=new THREE.BoxGeometry(100, 100, 100);//创建一个立方体几何对象
+		var material=new THREE.MeshLambertMaterial({color:0xff00ff});//材质对象
+		var mesh=new THREE.Mesh(box,material);//网格模型对象
+		// mesh.translateX(20);//网格模型mesh平移
+		// box.scale(1.5,1.5,1.5);//几何体缩放
+		scene.add(mesh);//网格模型添加到场景中
+		// 设置产生投影的网格模型
+		mesh.castShadow = true;
 
 		// 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置
 		var axisHelper = new THREE.AxisHelper(250);
 		scene.add(axisHelper);
 
+
+		//创建一个平面几何体作为投影面
+		var planeGeometry = new THREE.PlaneGeometry(300, 200);
+		var planeMaterial = new THREE.MeshLambertMaterial({
+			color: 0x999999,
+		});
+		// 平面网格模型作为投影面
+		var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+		planeMesh.rotateX(-Math.PI / 2); //旋转网格模型
+		planeMesh.position.y = -50; //设置网格模型y坐标
+		// 设置接收阴影的投影面
+		planeMesh.receiveShadow = true;
+		scene.add(planeMesh); //网格模型添加到场景中
+
+
     /**
      * 光源设置
      */
     //点光源
-    var point = new THREE.PointLight(0xffffff);
-    point.position.set(200, 400, 300); //点光源位置
-    scene.add(point); //点光源添加到场景中
+    // var point = new THREE.PointLight(0xff0000);
+    // point.position.set(-100, 100, -100); //点光源位置
+    // scene.add(point); //点光源添加到场景中
+
+		// var PointLightHelper = new THREE.PointLightHelper(point, 30);
+		// scene.add(PointLightHelper);
+
+		// 平行光
+		var directionalLight = new THREE.DirectionalLight(0x00ff00, 1);
+		// 设置光源的方向：通过光源position属性和目标指向对象的position属性计算
+		directionalLight.position.set(0, 100, 100);
+		// 方向光指向对象网格模型mesh2，可以不设置，默认的位置是0,0,0
+		directionalLight.target = mesh;
+		// 设置用于计算阴影的光源对象
+		directionalLight.castShadow = true;
+		// 设置计算阴影的区域，最好刚好紧密包围在对象周围
+		// 计算阴影的区域过大：模糊  过小：看不到或显示不完整
+		directionalLight.shadow.camera.near = 0.5;
+		directionalLight.shadow.camera.far = 300;
+		directionalLight.shadow.camera.left = -50;
+		directionalLight.shadow.camera.right = 50;
+		directionalLight.shadow.camera.top = 200;
+		directionalLight.shadow.camera.bottom = -100;
+		scene.add(directionalLight);
+
+		// 设置mapSize属性可以使阴影更清晰，不那么模糊
+		// directionalLight.shadow.mapSize.set(1024,1024)
+		console.log(directionalLight.shadow.camera);
+
+		var DirectionalLightHelper = new THREE.DirectionalLightHelper(directionalLight);
+		scene.add(DirectionalLightHelper);
+
+		// 聚光光源
+		// var spotLight = new THREE.SpotLight(0x0000ff);
+		// // 设置聚光光源位置
+		// spotLight.position.set(100, 100, -100);
+		// // 聚光灯光源指向网格模型mesh2
+		// spotLight.target = mesh;
+		// // 设置聚光光源发散角度
+		// spotLight.angle = Math.PI / 6
+		// scene.add(spotLight);//光对象添加到scene场景中
+		// // 设置用于计算阴影的光源对象
+		// spotLight.castShadow = true;
+		// // 设置计算阴影的区域，注意包裹对象的周围
+		// spotLight.shadow.camera.near = 1;
+		// spotLight.shadow.camera.far = 300;
+		// spotLight.shadow.camera.fov = 20;
+		// var spotLightHelper = new THREE.SpotLightHelper(spotLight);
+		// scene.add(spotLightHelper);
+
     //环境光
-    var ambient = new THREE.AmbientLight(0x444444);
+    var ambient = new THREE.AmbientLight(0x440000, 1);
     scene.add(ambient);
 
 
@@ -128,9 +125,9 @@
     //执行渲染操作   指定场景、相机作为参数
 
 		function render() {
-		  renderer.render(scene,camera);//执行渲染操作
-		  // mesh.rotateY(0.01);//每次绕y轴旋转0.01弧度
-		  requestAnimationFrame(render);//请求再次执行渲染函数render
+			renderer.render(scene,camera);//执行渲染操作
+			// mesh.rotateY(0.01);//每次绕y轴旋转0.01弧度
+			requestAnimationFrame(render);//请求再次执行渲染函数render
 		}
 		render();
 		var controls = new THREE.OrbitControls(camera,renderer.domElement);//创建控件对象
