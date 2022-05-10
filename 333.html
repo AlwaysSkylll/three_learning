@@ -17,40 +17,88 @@
 		 */
 		var scene = new THREE.Scene();
 
-// 		var box = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象
-// 		var material = new THREE.MeshLambertMaterial({
-// 			color: 0xffffff
-// 		}); //材质对象
-// 		var mesh = new THREE.Mesh(box, material); //网格模型对象
-// 		// mesh.translateX(20);//网格模型mesh平移
-// 		// box.scale(1.5,1.5,1.5);//几何体缩放
-// 		scene.add(mesh); //网格模型添加到场景中
-// 		// 设置产生投影的网格模型
-// 1		mesh.castShadow = true;
-		var geometry = new THREE.BoxGeometry(20, 20, 20);
-		var material = new THREE.MeshLambertMaterial({ color: 0xff0000 })
-		var group = new THREE.Group()
-		var mesh1 = new THREE.Mesh(geometry, material)
-		var mesh2 = new THREE.Mesh(geometry, material)
-		mesh1.castShadow = true;
-		mesh1.receiveShadow = true;
-		mesh1.name = '眼睛'
-		mesh2.castShadow = true;
-		mesh2.receiveShadow = true;
-		mesh2.name = '眼睛'
-		mesh2.translateX(25)
+		// 头部网格模型和组
+		var headMesh = sphereMesh(10, 0, 0, 0);
+		headMesh.name = "脑壳"
+		var leftEyeMesh = sphereMesh(1, 8, 5, 4);
+		leftEyeMesh.name = "左眼"
+		var rightEyeMesh = sphereMesh(1, 8, 5, -4);
+		rightEyeMesh.name = "右眼"
+		var headGroup = new THREE.Group();
+		headGroup.name = "头部"
+		headGroup.castShadow = true
+		headGroup.add(headMesh, leftEyeMesh, rightEyeMesh);
+		// 身体网格模型和组
+		var neckMesh = cylinderMesh(3, 10, 0, -15, 0);
+		neckMesh.name = "脖子"
+		var bodyMesh = cylinderMesh(14, 30, 0, -35, 0);
+		bodyMesh.name = "腹部"
+		var leftLegMesh = cylinderMesh(4, 60, 0, -80, -7);
+		leftLegMesh.name = "左腿"
+		var rightLegMesh = cylinderMesh(4, 60, 0, -80, 7);
+		rightLegMesh.name = "右腿"
+		var legGroup = new THREE.Group();
+		legGroup.name = "腿"
+		legGroup.add(leftLegMesh, rightLegMesh);
+		var bodyGroup = new THREE.Group();
+		bodyGroup.name = "身体"
+		bodyGroup.add(neckMesh, bodyMesh, legGroup);
+		bodyGroup.receiveShadow = true;
+		// 人Group
+		var personGroup = new THREE.Group();
+		personGroup.name = "人"
+		personGroup.add(headGroup, bodyGroup)
+		personGroup.translateY(50)
+		scene.add(personGroup);
 
-		group.add(mesh1)
-		group.add(mesh2)
-		group.translateY(0)
-		group.scale.set(4,4,4)
-		group.rotateY(Math.PI/6)
-		group.name = '头'
+		// 球体网格模型创建函数
+		function sphereMesh(R, x, y, z) {
+		var geometry = new THREE.SphereGeometry(R, 25, 25); //球体几何体
+		var material = new THREE.MeshPhongMaterial({
+			color: 0x0000ff
+		}); //材质对象Material
+		var mesh = new THREE.Mesh(geometry, material); // 创建网格模型对象
+		mesh.position.set(x, y, z);
+		return mesh;
+		}
+		// 圆柱体网格模型创建函数
+		function cylinderMesh(R, h, x, y, z) {
+			var geometry = new THREE.CylinderGeometry(R, R, h, 25, 25); //球体几何体
+			var material = new THREE.MeshPhongMaterial({
+				color: 0x0000ff
+			}); //材质对象Material
+			var mesh = new THREE.Mesh(geometry, material); // 创建网格模型对象
+			mesh.position.set(x, y, z);
+			return mesh;
+		}
+		
+		scene.traverse(function(obj) {
+			if (obj.type === "Group") {
+				console.log(obj.name);
+			}
+			if (obj.type === "Mesh") {
+				console.log('  ' + obj.name);
+				obj.material.color.set(0xffff00);
+			}
+			if (obj.name === "左眼" | obj.name === "右眼") {
+				obj.material.color.set(0x000000)
+			}
+			// 打印id属性
+			console.log(obj.id);
+			// 打印该对象的父对象
+			console.log(obj.parent);
+			// 打印该对象的子对象
+			console.log(obj.children);
+		})
 
-		scene.add(group)
+		var idNode = scene.getObjectById ( 4 );
+		console.error(idNode);
 
-		console.log('查看group的子对象',group.children);
-		console.log('查看Scene的子对象',scene.children);
+		var nameNode = scene.getObjectByName ( "左腿" );
+		nameNode.material.color.set(0xff0000);
+
+		// console.log('查看group的子对象',headGroup.children);
+		// console.log('查看Scene的子对象',scene.children);
 
 		// 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置
 		var axisHelper = new THREE.AxesHelper(250);
@@ -71,6 +119,31 @@
 		scene.add(planeMesh); //网格模型添加到场景中
 
 
+		// 世界坐标 本地坐标
+		var geometry = new THREE.BoxGeometry(20, 20, 20);
+		var material = new THREE.MeshLambertMaterial({
+			color: 0x0000ff
+		})
+		var mesh = new THREE.Mesh(geometry, material);
+		// mesh的本地坐标设置为(50, 0, 0)
+		mesh.position.set(50, 0, 0);
+		var group = new THREE.Group();
+		// group本地坐标设置和mesh一样设置为(50, 0, 0)
+		// mesh父对象设置position会影响得到mesh的世界坐标
+		group.position.set(50, 0, 0);
+		group.add(mesh);
+		group.scale.set(2,2,2)
+		scene.add(group);
+		// .position属性获得本地坐标
+		console.log('本地坐标',mesh.position);
+		// getWorldPosition()方法获得世界坐标
+		//该语句默认在threejs渲染的过程中执行,如果渲染之前想获得世界矩阵属性、世界位置属性等属性，需要通过代码更新
+		scene.updateMatrixWorld(true);
+		var worldPosition = new THREE.Vector3();
+		mesh.getWorldPosition(worldPosition);
+		console.log('世界坐标',worldPosition);
+
+
 		/**
 		 * 光源设置
 		 */
@@ -87,7 +160,7 @@
 		// 设置光源的方向：通过光源position属性和目标指向对象的position属性计算
 		directionalLight.position.set(50, 100, 100);
 		// 方向光指向对象网格模型mesh2，可以不设置，默认的位置是0,0,0
-		directionalLight.target = group;
+		directionalLight.target = personGroup;
 		// 设置用于计算阴影的光源对象
 		directionalLight.castShadow = true;
 
@@ -109,11 +182,11 @@
 		scene.add(DirectionalLightHelper);
 
 		// 聚光光源
-		var spotLight = new THREE.SpotLight(0x0000ff);
+		var spotLight = new THREE.SpotLight(0x00ff00);
 		// 设置聚光光源位置
 		spotLight.position.set(100, 100, -100);
 		// 聚光灯光源指向网格模型mesh2
-		spotLight.target = group;
+		spotLight.target = personGroup;
 		// 设置聚光光源发散角度
 		spotLight.angle = Math.PI / 6
 		scene.add(spotLight);//光对象添加到scene场景中
@@ -127,7 +200,7 @@
 		scene.add(spotLightHelper);
 
 		//环境光
-		var ambient = new THREE.AmbientLight(0x440000, 1);
+		var ambient = new THREE.AmbientLight(0x444444, 1);
 		scene.add(ambient);
 
 
