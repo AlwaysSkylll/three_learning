@@ -17,19 +17,43 @@
 		 */
 		var scene = new THREE.Scene();
 
-		var box = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象
-		var material = new THREE.MeshLambertMaterial({
-			color: 0xffffff
-		}); //材质对象
-		var mesh = new THREE.Mesh(box, material); //网格模型对象
-		// mesh.translateX(20);//网格模型mesh平移
-		// box.scale(1.5,1.5,1.5);//几何体缩放
-		scene.add(mesh); //网格模型添加到场景中
-		// 设置产生投影的网格模型
-		mesh.castShadow = true;
+// 		var box = new THREE.BoxGeometry(100, 100, 100); //创建一个立方体几何对象
+// 		var material = new THREE.MeshLambertMaterial({
+// 			color: 0xffffff
+// 		}); //材质对象
+// 		var mesh = new THREE.Mesh(box, material); //网格模型对象
+// 		// mesh.translateX(20);//网格模型mesh平移
+// 		// box.scale(1.5,1.5,1.5);//几何体缩放
+// 		scene.add(mesh); //网格模型添加到场景中
+// 		// 设置产生投影的网格模型
+// 1		mesh.castShadow = true;
+		var geometry = new THREE.BoxGeometry(20, 20, 20);
+		var material = new THREE.MeshLambertMaterial({ color: 0xff0000 })
+		var group = new THREE.Group()
+		var mesh1 = new THREE.Mesh(geometry, material)
+		var mesh2 = new THREE.Mesh(geometry, material)
+		mesh1.castShadow = true;
+		mesh1.receiveShadow = true;
+		mesh1.name = '眼睛'
+		mesh2.castShadow = true;
+		mesh2.receiveShadow = true;
+		mesh2.name = '眼睛'
+		mesh2.translateX(25)
+
+		group.add(mesh1)
+		group.add(mesh2)
+		group.translateY(0)
+		group.scale.set(4,4,4)
+		group.rotateY(Math.PI/6)
+		group.name = '头'
+
+		scene.add(group)
+
+		console.log('查看group的子对象',group.children);
+		console.log('查看Scene的子对象',scene.children);
 
 		// 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置
-		var axisHelper = new THREE.AxisHelper(250);
+		var axisHelper = new THREE.AxesHelper(250);
 		scene.add(axisHelper);
 
 
@@ -63,7 +87,7 @@
 		// 设置光源的方向：通过光源position属性和目标指向对象的position属性计算
 		directionalLight.position.set(50, 100, 100);
 		// 方向光指向对象网格模型mesh2，可以不设置，默认的位置是0,0,0
-		directionalLight.target = mesh;
+		directionalLight.target = group;
 		// 设置用于计算阴影的光源对象
 		directionalLight.castShadow = true;
 
@@ -89,7 +113,7 @@
 		// 设置聚光光源位置
 		spotLight.position.set(100, 100, -100);
 		// 聚光灯光源指向网格模型mesh2
-		spotLight.target = mesh;
+		spotLight.target = group;
 		// 设置聚光光源发散角度
 		spotLight.angle = Math.PI / 6
 		scene.add(spotLight);//光对象添加到scene场景中
@@ -118,7 +142,6 @@
 		var camera = new THREE.OrthographicCamera(-s * k, s * k, s, -s, 1, 1000);
 		camera.position.set(200, 400, 200); //设置相机位置
 		camera.lookAt(scene.position); //设置相机方向(指向的场景对象)
-
 
 		/**
 		 * 创建渲染器对象
