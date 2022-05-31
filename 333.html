@@ -17,192 +17,37 @@
 		 */
 		var scene = new THREE.Scene();
 
-		// 头部网格模型和组
-		var headMesh = sphereMesh(10, 0, 0, 0);
-		headMesh.name = "脑壳"
-		var leftEyeMesh = sphereMesh(1, 8, 5, 4);
-		leftEyeMesh.name = "左眼"
-		var rightEyeMesh = sphereMesh(1, 8, 5, -4);
-		rightEyeMesh.name = "右眼"
-		var headGroup = new THREE.Group();
-		headGroup.name = "头部"
-		headGroup.castShadow = true
-		headGroup.add(headMesh, leftEyeMesh, rightEyeMesh);
-		// 身体网格模型和组
-		var neckMesh = cylinderMesh(3, 10, 0, -15, 0);
-		neckMesh.name = "脖子"
-		var bodyMesh = cylinderMesh(14, 30, 0, -35, 0);
-		bodyMesh.name = "腹部"
-		var leftLegMesh = cylinderMesh(4, 60, 0, -80, -7);
-		leftLegMesh.name = "左腿"
-		var rightLegMesh = cylinderMesh(4, 60, 0, -80, 7);
-		rightLegMesh.name = "右腿"
-		var legGroup = new THREE.Group();
-		legGroup.name = "腿"
-		legGroup.add(leftLegMesh, rightLegMesh);
-		var bodyGroup = new THREE.Group();
-		bodyGroup.name = "身体"
-		bodyGroup.add(neckMesh, bodyMesh, legGroup);
-		bodyGroup.receiveShadow = true;
-		// 人Group
-		var personGroup = new THREE.Group();
-		personGroup.name = "人"
-		personGroup.add(headGroup, bodyGroup)
-		personGroup.translateY(50)
-		scene.add(personGroup);
-
-		// 球体网格模型创建函数
-		function sphereMesh(R, x, y, z) {
-		var geometry = new THREE.SphereGeometry(R, 25, 25); //球体几何体
-		var material = new THREE.MeshPhongMaterial({
-			color: 0x0000ff
-		}); //材质对象Material
-		var mesh = new THREE.Mesh(geometry, material); // 创建网格模型对象
-		mesh.position.set(x, y, z);
-		return mesh;
-		}
-		// 圆柱体网格模型创建函数
-		function cylinderMesh(R, h, x, y, z) {
-			var geometry = new THREE.CylinderGeometry(R, R, h, 25, 25); //球体几何体
-			var material = new THREE.MeshPhongMaterial({
-				color: 0x0000ff
-			}); //材质对象Material
-			var mesh = new THREE.Mesh(geometry, material); // 创建网格模型对象
-			mesh.position.set(x, y, z);
-			return mesh;
-		}
-		
-		scene.traverse(function(obj) {
-			if (obj.type === "Group") {
-				console.log(obj.name);
-			}
-			if (obj.type === "Mesh") {
-				console.log('  ' + obj.name);
-				obj.material.color.set(0xffff00);
-			}
-			if (obj.name === "左眼" | obj.name === "右眼") {
-				obj.material.color.set(0x000000)
-			}
-			// 打印id属性
-			console.log(obj.id);
-			// 打印该对象的父对象
-			console.log(obj.parent);
-			// 打印该对象的子对象
-			console.log(obj.children);
-		})
-
-		var idNode = scene.getObjectById ( 4 );
-		console.error(idNode);
-
-		var nameNode = scene.getObjectByName ( "左腿" );
-		nameNode.material.color.set(0xff0000);
-
-		// console.log('查看group的子对象',headGroup.children);
-		// console.log('查看Scene的子对象',scene.children);
-
-		// 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置
-		var axisHelper = new THREE.AxesHelper(250);
-		scene.add(axisHelper);
-
-
-		//创建一个平面几何体作为投影面
-		var planeGeometry = new THREE.PlaneGeometry(800, 800);
-		var planeMaterial = new THREE.MeshLambertMaterial({
-			color: 0x999999,
+		var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+		//参数：0, 0圆弧坐标原点x，y  100：圆弧半径    0, 2 * Math.PI：圆弧起始角度
+		var arc = new THREE.ArcCurve(0, 0, 100, 0, 2 * Math.PI);
+		//getPoints是基类Curve的方法，返回一个vector2对象作为元素组成的数组
+		var points = arc.getPoints(80);//分段数50，返回51个顶点
+		// setFromPoints方法从points中提取数据改变几何体的顶点属性vertices
+		geometry.setFromPoints(points);
+		//材质对象
+		var material = new THREE.PointsMaterial({
+		  color: 0x000000,
+		  size: 20
 		});
-		// 平面网格模型作为投影面
-		var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
-		planeMesh.rotateX(-Math.PI / 2); //旋转网格模型
-		planeMesh.position.y = -50; //设置网格模型y坐标
-		// 设置接收阴影的投影面
-		planeMesh.receiveShadow = true;
-		scene.add(planeMesh); //网格模型添加到场景中
+		console.log(geometry.vertices);
+		//线条模型对象
+		var line = new THREE.Points(geometry, material);
+		scene.add(line); //线条对象添加到场景中
+		// 如果几何体是BufferGeometry，setFromPoints方法改变的是.attributes.position属性
+		// console.log(geometry.attributes.position);
 
 
-		// 世界坐标 本地坐标
-		var geometry = new THREE.BoxGeometry(20, 20, 20);
-		var material = new THREE.MeshLambertMaterial({
-			color: 0x0000ff
-		})
-		var mesh = new THREE.Mesh(geometry, material);
-		// mesh的本地坐标设置为(50, 0, 0)
-		mesh.position.set(50, 0, 0);
-		var group = new THREE.Group();
-		// group本地坐标设置和mesh一样设置为(50, 0, 0)
-		// mesh父对象设置position会影响得到mesh的世界坐标
-		group.position.set(50, 0, 0);
-		group.add(mesh);
-		group.scale.set(2,2,2)
-		scene.add(group);
-		// .position属性获得本地坐标
-		console.log('本地坐标',mesh.position);
-		// getWorldPosition()方法获得世界坐标
-		//该语句默认在threejs渲染的过程中执行,如果渲染之前想获得世界矩阵属性、世界位置属性等属性，需要通过代码更新
-		scene.updateMatrixWorld(true);
-		var worldPosition = new THREE.Vector3();
-		mesh.getWorldPosition(worldPosition);
-		console.log('世界坐标',worldPosition);
-
-
-		/**
-		 * 光源设置
-		 */
-		//点光源
-		// var point = new THREE.PointLight(0xff0000);
-		// point.position.set(-100, 100, -100); //点光源位置
-		// scene.add(point); //点光源添加到场景中
-
-		// var PointLightHelper = new THREE.PointLightHelper(point, 30);
-		// scene.add(PointLightHelper);
-
-		// 平行光
-		var directionalLight = new THREE.DirectionalLight(0xff0000, 1);
-		// 设置光源的方向：通过光源position属性和目标指向对象的position属性计算
-		directionalLight.position.set(50, 100, 100);
-		// 方向光指向对象网格模型mesh2，可以不设置，默认的位置是0,0,0
-		directionalLight.target = personGroup;
-		// 设置用于计算阴影的光源对象
-		directionalLight.castShadow = true;
-
-		// 设置计算阴影的区域，最好刚好紧密包围在对象周围
-		// 计算阴影的区域过大：模糊  过小：看不到或显示不完整
-		directionalLight.shadow.camera.near = 0.5;
-		directionalLight.shadow.camera.far = 300;
-		directionalLight.shadow.camera.left = -50;
-		directionalLight.shadow.camera.right = 50;
-		directionalLight.shadow.camera.top = 200;
-		directionalLight.shadow.camera.bottom = -100;
-		scene.add(directionalLight);
-
-		// 设置mapSize属性可以使阴影更清晰，不那么模糊
-		directionalLight.shadow.mapSize.set(1024,1024)
-		console.log(directionalLight.shadow.camera);
-
-		var DirectionalLightHelper = new THREE.DirectionalLightHelper(directionalLight);
-		scene.add(DirectionalLightHelper);
-
-		// 聚光光源
-		var spotLight = new THREE.SpotLight(0x00ff00);
-		// 设置聚光光源位置
-		spotLight.position.set(100, 100, -100);
-		// 聚光灯光源指向网格模型mesh2
-		spotLight.target = personGroup;
-		// 设置聚光光源发散角度
-		spotLight.angle = Math.PI / 6
-		scene.add(spotLight);//光对象添加到scene场景中
-		// 设置用于计算阴影的光源对象
-		spotLight.castShadow = true;
-		// 设置计算阴影的区域，注意包裹对象的周围
-		spotLight.shadow.camera.near = 1;
-		spotLight.shadow.camera.far = 300;
-		spotLight.shadow.camera.fov = 20;
-		var spotLightHelper = new THREE.SpotLightHelper(spotLight);
-		scene.add(spotLightHelper);
-
-		//环境光
-		var ambient = new THREE.AmbientLight(0x444444, 1);
-		scene.add(ambient);
-
+		var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
+		var p1 = new THREE.Vector3(50, 0, -50); //顶点1坐标
+		var p2 = new THREE.Vector3(0, 70, 50); //顶点2坐标
+		// 三维直线LineCurve3
+		var LineCurve = new THREE.LineCurve3(p1, p2);
+		// 二维直线LineCurve
+		// var LineCurve = new THREE.LineCurve(new THREE.Vector2(50, 0), new THREE.Vector2(0, 70));
+		var pointArr = LineCurve.getPoints(10);
+		geometry.setFromPoints(pointArr);
+		var line = new THREE.Line(geometry, material);
+		scene.add(line); //线条对象添加到场景中
 
 		/**
 		 * 相机设置
