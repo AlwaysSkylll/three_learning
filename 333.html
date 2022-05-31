@@ -18,34 +18,23 @@
 		var scene = new THREE.Scene();
 
 		var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
-		//参数：0, 0圆弧坐标原点x，y  100：圆弧半径    0, 2 * Math.PI：圆弧起始角度
-		var arc = new THREE.ArcCurve(0, 0, 100, 0, 2 * Math.PI);
-		//getPoints是基类Curve的方法，返回一个vector2对象作为元素组成的数组
-		var points = arc.getPoints(80);//分段数50，返回51个顶点
+		// 三维样条曲线  Catmull-Rom算法
+		var curve = new THREE.CatmullRomCurve3([
+		new THREE.Vector3(-50, 20, 90),
+		new THREE.Vector3(-10, 40, 40),
+		new THREE.Vector3(0, 0, 0),
+		new THREE.Vector3(60, -60, 0),
+		new THREE.Vector3(70, 0, 80)
+		]);
+		//getPoints是基类Curve的方法，返回一个vector3对象作为元素组成的数组
+		var points = curve.getPoints(4); //分段数100，返回101个顶点
 		// setFromPoints方法从points中提取数据改变几何体的顶点属性vertices
 		geometry.setFromPoints(points);
 		//材质对象
-		var material = new THREE.PointsMaterial({
-		  color: 0x000000,
-		  size: 20
+		var material = new THREE.LineBasicMaterial({
+		color: 0x000000
 		});
-		console.log(geometry.vertices);
 		//线条模型对象
-		var line = new THREE.Points(geometry, material);
-		scene.add(line); //线条对象添加到场景中
-		// 如果几何体是BufferGeometry，setFromPoints方法改变的是.attributes.position属性
-		// console.log(geometry.attributes.position);
-
-
-		var geometry = new THREE.Geometry(); //声明一个几何体对象Geometry
-		var p1 = new THREE.Vector3(50, 0, -50); //顶点1坐标
-		var p2 = new THREE.Vector3(0, 70, 50); //顶点2坐标
-		// 三维直线LineCurve3
-		var LineCurve = new THREE.LineCurve3(p1, p2);
-		// 二维直线LineCurve
-		// var LineCurve = new THREE.LineCurve(new THREE.Vector2(50, 0), new THREE.Vector2(0, 70));
-		var pointArr = LineCurve.getPoints(10);
-		geometry.setFromPoints(pointArr);
 		var line = new THREE.Line(geometry, material);
 		scene.add(line); //线条对象添加到场景中
 
