@@ -18,75 +18,47 @@
 		var scene = new THREE.Scene();
 
 
-		var points = [
-			new THREE.Vector2(-50, -50),
-			new THREE.Vector2(-60, 0),
-			new THREE.Vector2(0, 50),
-			new THREE.Vector2(60, 0),
-			new THREE.Vector2(50, -50),
-			new THREE.Vector2(-50, -50),
-		]
-		// 通过顶点定义轮廓
-		// var shape = new THREE.Shape(points);
-		// // shape可以理解为一个需要填充轮廓
-		// // 所谓填充：ShapeGeometry算法利用顶点计算出三角面face3数据填充轮廓
-		// var geometry = new THREE.ShapeGeometry(shape, 25);
+		// 纹理贴图映射到一个矩形平面上
+		// var geometry = new THREE.PlaneGeometry(270, 150); //矩形平面
+		// var geometry = new THREE.BoxGeometry(100, 100, 100); //立方体
+		var geometry = new THREE.SphereGeometry(64, 25, 25); //球体
+		// TextureLoader创建一个纹理加载器对象，可以加载图片作为几何体纹理
+		// var textureLoader = new THREE.TextureLoader().load('http://10.23.9.47:57929/11.jpg', function(texture) {
+		// 	//纹理贴图加载成功后，调用渲染函数执行渲染操作
+		// 	// render();
+		// 	// 执行load方法，加载纹理贴图成功后，返回一个纹理对象Texture
+		// 	var material = new THREE.MeshLambertMaterial({
+		// 		// color: 0x0000ff,
+		// 		// 设置颜色纹理贴图：Texture对象作为材质map属性的属性值
+		// 		map: textureLoader,//设置颜色贴图属性值
+		// 	}); //材质对象Material
+		// 	var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+		// 	scene.add(mesh); //网格模型添加到场景中
+		// });
 
-		// 通过shpae基类path的方法绘制轮廓（本质也是生成顶点）
-		// var shape = new THREE.Shape();
-		// shape.absarc(0,0,100,0,2*Math.PI);//圆弧轮廓
-		// console.log(shape.getPoints(15));//查看shape顶点数据
-		// var geometry = new THREE.ShapeGeometry(shape, 25);
+		// 图片加载器
+		var ImageLoader = new THREE.ImageLoader();
+		// load方法回调函数，按照路径加载图片，返回一个html的元素img对象
+		ImageLoader.load('/11.jpg', function(img) {
+			// image对象作为参数，创建一个纹理对象Texture
+			var texture = new THREE.Texture(img);
+			// 下次使用纹理时触发更新
+			texture.needsUpdate = true;
+			var material = new THREE.MeshPhongMaterial({
+				map: texture, //设置纹理贴图
+			});
+			var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+			scene.add(mesh); //网格模型添加到场景中
+		});
+		
+		// 需要设置光源不然贴图是黑色
+		var point = new THREE.AmbientLight(0xffffff);
+		point.position.set(400, 100, 300)
+		scene.add(point)
 
-		// 通过shpae基类path的方法绘制轮廓（本质也是生成顶点）
-		// var shape = new THREE.Shape();
-		// // 四条直线绘制一个矩形轮廓
-		// shape.moveTo(0,0);//起点
-		// shape.lineTo(0,100);//第2点
-		// shape.lineTo(100,100);//第3点
-		// shape.lineTo(100,0);//第4点
-		// shape.lineTo(0,0);//第5点
-		// var geometry = new THREE.ShapeGeometry(shape, 25);
-
-		// 圆弧与直线连接
-		// var shape = new THREE.Shape(); //Shape对象
-		// var R = 50;
-		// // 绘制一个半径为R、圆心坐标(0, 0)的半圆弧
-		// shape.absarc(0, 0, R, 0, Math.PI);
-		// //从圆弧的一个端点(-R, 0)到(-R, -200)绘制一条直线
-		// shape.lineTo(-R, -200);
-		// // 绘制一个半径为R、圆心坐标(0, -200)的半圆弧
-		// shape.absarc(0, -200, R, Math.PI, 2 * Math.PI);
-		// //从圆弧的一个端点(R, -200)到(-R, -200)绘制一条直线
-		// shape.lineTo(R, 0);
-
-		// 一个外轮廓圆弧嵌套三个内圆弧轮廓
-		var shape = new THREE.Shape(); //Shape对象
-		//外轮廓
-		shape.arc(0, 0, 100, 0, 2 * Math.PI);
-		// 内轮廓1
-		var path1 = new THREE.Path();
-		path1.arc(0, 0, 40, 0, 2 * Math.PI);
-		// 内轮廓2
-		var path2 = new THREE.Path();
-		path2.arc(80, 0, 10, 0, 2 * Math.PI);
-		// 内轮廓3
-		var path3 = new THREE.Path();
-		path3.arc(-80, 0, 10, 0, 2 * Math.PI);
-		//三个内轮廓分别插入到holes属性中
-		shape.holes.push(path1, path2, path3);
-
-
-		var geometry = new THREE.ShapeGeometry(shape, 30);
-
-
-		var material=new THREE.MeshPhongMaterial({
-			color:0x0000ff,//三角面颜色
-			// side:THREE.DoubleSide//两面可见
-		});//材质对象
-		material.wireframe = true;//线条模式渲染(查看细分数)
-		var mesh=new THREE.Mesh(geometry,material);//旋转网格模型对象
-		scene.add(mesh);//旋转网格模型添加到场景中
+		var point = new THREE.PointLight(0xff0000);
+		point.position.set(400, 100, 300)
+		scene.add(point)
 
 		/**
 		 * 相机设置
