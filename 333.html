@@ -17,73 +17,43 @@
 		 */
 		var scene = new THREE.Scene();
 
-		// var textureLoader = new THREE.TextureLoader();
-		// var geometry = new THREE.PlaneGeometry(204, 102, 4, 4);
-		// var texture =  textureLoader.load('11.jpg');
-		// // 设置阵列模式   默认ClampToEdgeWrapping  RepeatWrapping：阵列  镜像阵列：MirroredRepeatWrapping
-		// texture.wrapS = THREE.RepeatWrapping;
-		// texture.wrapT = THREE.RepeatWrapping;
-		// // uv两个方向纹理重复数量
-		// texture.repeat.set(3, 2);
+		// var canvas = document.createElement("canvas");
+		// canvas.width = 512;
+		// canvas.height = 128;
+		// var c = canvas.getContext('2d');
 
-		// // 不设置重复  偏移范围-1~1
-		// texture.offset = new THREE.Vector2(0.5, 0.5)
+		// canvas画布对象作为CanvasTexture的参数重建一个纹理对象
+		// var texture = new THREE.CanvasTexture(canvas);
+		//打印纹理对象的image属性
+		// var img = new Image();
+		// img.src = "./grass.webp";
 
-		// // 设置纹理旋转角度
-		// texture.rotation = Math.PI/4;
-		// // 设置纹理的旋转中心，默认(0,0)
-		// texture.center.set(0.5,0.5);
+		// img.onload = function() {
+		// 	var bg = c.createPattern(img, "no-repeat");
+		// 	c.fillStyle=bg;
+		// 	c.fillRect(0, 0, 512, 128);
 
-		// var material = new THREE.MeshLambertMaterial({
-		// 	map: texture,
-		// });
-		// var mesh = new THREE.Mesh(geometry, material)
+		// 	c.fill();
+		// 	//矩形平面
+		// 	texture.needsUpdate = true;
+		// 	// 注意图片加载完成执行canvas相关方法后，要更新一下纹理
+		// }
 
+		let  video = document.createElement("video");
+		video.src = "./video.mp4";
+		video.autoplay = 'autoplay';
 
-		// scene.add(mesh); //网格模型添加到场景中
+		var texture = new THREE.VideoTexture(video)
 
+		var geometry = new THREE.PlaneGeometry(108, 71);
 
-		/**
-		 * 创建一个地面
-		 */
-		// var geometry = new THREE.PlaneGeometry(1000, 1000); //矩形平面
-		// // 加载树纹理贴图
-		// var texture = new THREE.TextureLoader().load("grass.webp");
-		// // 设置阵列
-		// texture.wrapS = THREE.RepeatWrapping;
-		// texture.wrapT = THREE.RepeatWrapping;
-		// // uv两个方向纹理重复数量
-		// texture.repeat.set(10, 10);
-		// var material = new THREE.MeshLambertMaterial({
-		// 	map: texture,
-		// });
-		// var mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-		// mesh.rotateX(-Math.PI / 2);
-
-		/**
-		 * 创建一个设置重复纹理的管道
-		 */
-		var curve = new THREE.CatmullRomCurve3([
-			new THREE.Vector3(-80, -40, 0),
-			new THREE.Vector3(-70, 40, 0),
-			new THREE.Vector3(70, 40, 0),
-			new THREE.Vector3(80, -40, 0)
-		]);
-		var tubeGeometry = new THREE.TubeGeometry(curve, 100, 0.6, 50, false);
-		var textureLoader = new THREE.TextureLoader();
-		var texture = textureLoader.load('grass.webp');
-		// 设置阵列模式为 RepeatWrapping
-		texture.wrapS = THREE.RepeatWrapping
-		texture.wrapT=THREE.RepeatWrapping
-		// 设置x方向的偏移(沿着管道路径方向)，y方向默认1
-		//等价texture.repeat= new THREE.Vector2(20,1)
-		texture.repeat.x = 20;
-		var tubeMaterial = new THREE.MeshPhongMaterial({
-			map: texture,
-			transparent: true,
-		});	
-		var mesh = new THREE.Mesh(tubeGeometry, tubeMaterial); //网格模型对象Mesh
-		scene.add(mesh); //网格模型添加到场景中
+		var material = new THREE.MeshPhongMaterial({
+			map: texture, // 设置纹理贴图
+			// side: THREE.BackSide,
+		});
+		// 创建一个矩形平面网模型，Canvas画布作为矩形网格模型的纹理贴图
+		var mesh = new THREE.Mesh(geometry, material);
+		scene.add(mesh)
 		
 		// 需要设置光源不然贴图是黑色
 		var point = new THREE.AmbientLight(0xf4f4f4);
@@ -120,10 +90,6 @@
 			renderer.render(scene, camera); //执行渲染操作
 			// mesh.rotateY(0.01);//每次绕y轴旋转0.01弧度
 			requestAnimationFrame(render); //请求再次执行渲染函数render
-
-			// 使用加减法可以设置不同的运动方向
-			// 设置纹理偏移
-			texture.offset.x -= 0.02
 		}
 		render();
 		var controls = new THREE.OrbitControls(camera, renderer.domElement); //创建控件对象
